@@ -1,0 +1,314 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>{{title}}</title>
+{{>scripts}}
+
+</head>
+
+<body>
+
+<div id="content">
+{{{doctext}}}
+</div>
+
+<P><h6><i>Article: {{docid}} rev: {{docrev}}</i></h6></P>
+
+
+<hr>
+<!-- form to create a post -->
+<form id="update-art" action="{{dbname}}/{{docid}}" method="POST" content-type='multipart/form-data'>
+
+
+<p>
+{{#b_new_doc}}
+<label><a href="" id="doc-url-calculate">doc-url: </a><input type="text" id="doc_url" name="doc_url" value="" style="width:90%"></label><br/>
+{{/b_new_doc}}
+<label>Text:<br><!-- rows="15" cols="80" -->
+
+
+
+</label>
+</p>
+<p>
+<label>tags: <input type="text" id="tags" name="tags" value="" style="width:90%"></label>
+</p>
+
+
+<input type="submit" id="submit-art" value="Save &rarr;"/><label id="show_rev"></label>
+
+
+</form>
+<hr>
+
+
+{{^b_new_doc}}
+<div id="filelist">Attachments</div>
+
+<form id='attachment-form' method='post' action='/{{db_name}}/{{docid}}' content-type='multipart/form-data' enctype='multipart/form-data' >
+	<input id='_attachments' type='file' name='_attachments'/>
+	<input type='hidden' id='_rev' name='_rev' value='{{docrev}}'/>
+	<input type="submit" id="upload-button" value="upload"/>
+</form>
+{{/b_new_doc}}
+
+
+<a href="http://de.wikipedia.org/wiki/Hilfe:TeX">wiki/Hilfe:TeX</a>
+<a href="http://www.mathjax.org/resources/docs/?tex.html">mathjax</a>
+
+</body>
+
+<script type="text/javascript" charset="utf-8">
+
+		var __clean_mathjax__ = function(e){
+
+			//var tex_display = Array();
+			//element.children('div.MathJax_Display').remove();
+
+
+			//math/tex; mode=display
+			//e.children('script[type="math/tex; mode=display"]').each(function(){
+			e.children('script').each(function(){
+				//tex_display.push($(this).html());
+				var dollar='';
+				if ($(this).attr('type')== "math/tex; mode=display") dollar = '$$';
+				else if ($(this).attr('type')== "math/tex") dollar = '$';
+				else return;
+
+				var script = $(this).get()[0];
+				var jax = MathJax.Hub.getJaxFor(script);
+				//if (jax!=null){ 
+					var tex = jax.originalText;
+					jax.Remove();
+				//}
+				$(this).replaceWith(dollar+tex+dollar);
+				//$(this).remove();
+			});
+
+
+			e.children('span.MathJax_Preview').remove();
+			
+			e.children().each(function(){
+				__clean_mathjax__($(this));
+			});
+			
+		}
+
+
+var editor = null;
+
+$(document).ready(function() {
+
+
+{{^b_new_doc}}
+
+	var delete_file = function(file){
+		alert(file);
+	};
+	
+	var update_file_list = function(){
+
+		$.get('/{{db_name}}/{{docid}}',
+			function(data) {
+				var doc = JSON.parse(data);
+				var list_html = '';
+				for (f in doc._attachments){
+					var del = '<a onclick="delete_file(\''+f+'\'); return false;">(delete)</a>';
+					list_html = list_html+'<b>'+f+'</b> &lt;img src="/{{db_name}}/{{docid}}/'+f+'"&gt;&lt;/img&gt;'+del+'<br>'
+				}
+  				$('#filelist').html(list_html);
+				//alert(data);
+			}
+		);
+	}
+	update_file_list();
+	//Attachments
+	var options = {
+		target:    '',
+		url:       "/{{db_name}}/{{docid}}",
+		type:      "post",
+		async:  false,
+		success:   function(data) {
+/*
+<head></head><body><pre>{"ok":true,"id":"2010-9-22_20:56_Wie_ist_die_Zeitentwicklung_dargestellt","rev":"40-12f01f6ff4b69e235b0b08ed61436d14"}
+</pre></body>
+
+{"error":"conflict","reason":"Document update conflict."}
+*/
+			var resp = JSON.parse($(data).html());
+			if (resp.error != undefined){ alert($(data).html()); return;}
+			
+			$('#_rev').attr('value',resp.rev);
+
+			update_file_list();
+		}
+	};
+
+	$("#upload-button").click(function() {
+		$("#attachment-form").ajaxSubmit(options);
+		return false;
+	});		
+{{/b_new_doc}}
+
+
+	var edit_part = function(){
+
+
+		var rand = Math.round(Math.random()*10000);
+		var edit_id = "the_page_edit";
+		var save_id = "save_the_edit";
+		var div_edit_id = "div_edit"+rand;
+
+
+		var element = $(this);
+		
+		__clean_mathjax__(element);
+
+
+		var element_html_str = element.outerHTML();
+
+		var replace_html_str = '<div id="'+div_edit_id+'"><a href="" id="'+save_id+'">&larr;</a><br><textarea style="width:95%;height:40%" id="'+edit_id+'" cols=120 rows=10>'+element_html_str+'</textarea></div>';
+
+		// look for an open editor bevore replacement
+		if ($('#'+save_id).length){
+			$('#'+save_id).trigger('click');
+			return;
+		}
+
+		// replace html with editor
+		$(this).replaceWith(replace_html_str);
+
+		$('#'+save_id).click( function() {
+			$('#'+div_edit_id).replaceWith($('#'+edit_id).val());
+			MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+			$('#content').children().click(edit_part);
+
+			{{^b_new_doc}}
+				// save the entiere doc
+				$('#submit-art').trigger('submit');
+			{{/b_new_doc}}
+			return false;
+		});
+	};
+	
+	
+	//$('#content').children().each( function(){alert($(this).outerHTML()); });
+	$('#content').children().click(edit_part);
+	/*var $sub = $('#content').children();
+	while ($sub.length != 0){
+		$sub.click(edit_part);
+		$sub = $sub.children();
+	}*/
+	//alert($('#content').html());
+
+	for (var i; i<document.getElementById("content").childNodes; i++){
+		alert(document.getElementById("content").childNodes[i].tagName);
+	}
+	
+
+
+
+var calculate_doc_url = function(){
+	var now = new Date();
+    var millis = (now).getTime();
+
+	var title = $('#content').text().substr(0,40);
+	title = title.replace(/\W/g,'_');
+    title = title.replace(/[_]+$/,'');
+	var month = (now.getMonth()+1)<10? '0'+(now.getMonth()+1):(now.getMonth()+1);
+	var day = (now.getDate()+1)<10? '0'+(now.getDate()+1):(now.getDate()+1);
+	var datum = now.getFullYear()+"-"+month+"-"+day+"_"
+					+now.getHours()+":"+now.getMinutes();
+    return datum + '_' + title;
+}
+
+	// calculate the doc url str	
+	if ($('#doc-url-calculate') != null){
+		$('#doc-url-calculate').click(function(){
+			$('#doc_url').val(calculate_doc_url());
+			return false;
+		});
+	}
+
+
+ 
+
+
+});
+
+
+
+$.couch.app(function(app) {
+
+  var redirect = app.require("vendor/couchapp/lib/redirect");
+
+
+  app.docForm("form#update-art", {
+    id : '{{docid}}',
+    fields: ['text', 'tags','doc_url'],
+    
+    template: {type: "article"}, 
+    beforeSave: function(doc) {
+
+		//edit = document.getElementById("f-test");
+		//doc.text = edit_area.getCode();
+
+		//doc.text_mathjax_cache = $('#content').html().replace("<script","\n<script");
+		var cache = $('#content').clone();
+		cache.find('script').remove();
+		doc.text_mathjax_cache = cache.html();
+
+		
+		//doc.text_mathjax_cache = $('#content').html().replace(/\n/,'');
+		//doc.text_mathjax_cache = $('#content').html().replace(/<script.*?>.*?<\/script>/,'');
+
+		//doc.text_mathjax_cache = null;
+
+		//var tmp = $('#content').clone()
+		__clean_mathjax__($('#content'));
+		doc.text = $('#content').html(); 
+
+		MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+
+
+		var now = new Date();
+		doc.creation = now.getTime();
+
+		{{#b_new_doc}}
+			if (doc.doc_url==null){
+				var month = (now.getMonth()+1)<10? '0'+(now.getMonth()+1):(now.getMonth()+1);
+				var day = (now.getDate()+1)<10? '0'+(now.getDate()+1):(now.getDate()+1);
+				var datum = now.getFullYear()+"-"+month+"-"+day+"_"
+					+now.getHours()+":"+now.getMinutes();
+				doc._id = datum + '_noname';
+			}
+			else doc._id =  doc.doc_url;
+		{{/b_new_doc}}
+
+
+		if (doc.tags != null && doc.tags != ''){
+			doc.tags = doc.tags.replace (/^\s+/,'').replace (/\s+$/,'');
+			doc.tags = doc.tags.split(',');
+			for (var i=0; i<doc.tags.length; i++) 
+			doc.tags[i] = doc.tags[i].replace (/^\s+/,'').replace (/\s+$/,'');
+		
+		}
+
+
+    },
+    success: function(res, doc) {
+        $('#show_rev').html(doc._rev);
+		{{#b_new_doc}}
+//			redirect.permanent('/{{db_name}}/_design/01/_show/edit2/'+doc._id);
+			redirect.permanent("/{{db_name}}/_design/{{doc_name}}/_show/edit2/{{docid}}");
+		{{/b_new_doc}}		
+		{{^b_new_doc}}
+			$('#_rev').attr('value',doc._rev);
+		{{/b_new_doc}}
+	
+	
+    }
+  });
+});
+</script>
+</html>

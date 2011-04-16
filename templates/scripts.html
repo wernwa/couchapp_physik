@@ -1,0 +1,66 @@
+<link rel="stylesheet" href="/{{db_name}}/_design/{{doc_name}}/style/main.css" type="text/css" />
+
+<script src="/_utils/script/sha1.js"></script>
+<script src="/_utils/script/json2.js"></script>
+<script src="/_utils/script/jquery.js"></script>
+<script src="/_utils/script/jquery.couch.js"></script>
+<script src="/{{db_name}}/_design/{{doc_name}}/vendor/couchapp/jquery.couch.app.js"></script>
+<script src="/{{db_name}}/_design/{{doc_name}}/vendor/couchapp/jquery.couch.app.util.js"></script>
+<script src="/{{db_name}}/_design/{{doc_name}}/vendor/couchapp/jquery.mustache.js"></script>
+<script src="/{{db_name}}/_design/{{doc_name}}/vendor/couchapp/jquery.evently.js"></script>
+<!--
+<script src="/jslib/mathjax/MathJax.js">
+MathJax.Hub.Config({
+    extensions: ["tex2jax.js","TeX/AMSmath.js", "TeX/AMSsymbol.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+
+<script src="/jslib/codepress/codepress.js" type="text/javascript"></script>
+-->
+
+<script src="/jslib/mathjax/MathJax.js">
+	MathJax.Hub.Config({
+	preview: ["[math]"],
+	messageStyle: "none",
+	showProcessingMessages: false,
+    	extensions: ["tex2jax.js"],
+    	jax: ["input/TeX","output/HTML-CSS"],
+	tex2jax: {skipTags: ["wahwah"]},
+	"HTML-CSS": {showMathMenu: false},
+	displayMath: [ ['$$','$$'], ['\[','\]'] ],
+//	skipTags:["script"],
+	processEnvironments: false
+  	});
+</script>
+
+
+
+<!-- 
+	Include the WYSIWYG javascript files
+
+<link rel="stylesheet" href="/jslib/openwysiwyg/docs/style.css" type="text/css">
+
+<script type="text/javascript" src="/jslib/openwysiwyg/scripts/wysiwyg.js"></script>
+<script type="text/javascript" src="/jslib/openwysiwyg/scripts/wysiwyg-settings.js"></script>
+-->
+
+<!-- Configure the path to the editor.  We make it relative now, so that the
+     example ZIP file will work anywhere, but please NOTE THAT it's better to
+     have it an absolute path, such as '/HTMLArea/'. -->
+<script type="text/javascript" src="/jslib/asciencepad/plugins/AsciiMath/ASCIIMathML.js"></script>
+
+<script type="text/javascript" src="/jslib/asciencepad/plugins/AsciiSvg/ASCIIsvg.js"></script>
+<script type="text/javascript" src="/jslib/asciencepad/plugins/AsciiSvg/ASCIIsvgAddon.js"></script>
+<script type="text/javascript">
+  _editor_url = "/jslib/asciencepad/";
+  _editor_lang = "en";
+</script>
+<script type="text/javascript" src="/jslib/asciencepad/htmlarea.js"></script>
+
+
+
+<script type="text/javascript" src="/jslib/ajaxfilemanager/ajaxfileupload.js"></script>
+<script type="text/javascript" src="/jslib/outerhtml/jquery.outerhtml.js"></script>
+<script type="text/javascript" src="/jslib/form/jquery.form.js"></script>

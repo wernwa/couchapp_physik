@@ -1,0 +1,7 @@
+{
+  "view": "tags",
+  "reduce":true,
+  "group":true
+}
+
+

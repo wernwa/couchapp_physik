@@ -1,0 +1,57 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>{{title}}</title>
+</head>
+
+<body>
+<p>
+<a href="http://www.phi.kit.edu/downloads.php#phys5_downloads">Festkörper UB</a><br>
+<a href="http://www-itp.particle.uni-karlsruhe.de/~gieseke/TheoE/">QM II</a><br>
+<a href="http://fachschaft.physik.uni-karlsruhe.de/drupal/">Fachschaft</a><br>
+</p>
+
+<h1>index</h1>
+
+<form id="search" method="GET" action="../l/s">
+<input type="text" id="search" name="search"/>
+<input type="hidden" id="startkey" name="startkey"/>
+<input type="hidden" id="endkey" name="endkey"/>
+<input type="hidden" name="reduce" value="true"/>
+<input type="hidden" name="group" value="true"/>
+<input id="submit" type="submit" value="search"/>
+</form>
+
+<a href="{{link_to_new_article}}">new article</a>
+ <ul>
+          {{#articles}}
+            {{>article}}
+          {{/articles}}
+        </ul>
+
+
+</body>
+{{>scripts}}
+<script type="text/javascript" charset="utf-8">
+
+
+$(document).ready(function() {
+
+	$('input#submit').click(function(){
+		var s = $('input#search').val().toLowerCase();
+		//var action = '?startkey=["'+s+'",0]&endkey=["'+s+'",{}]&reduce=true&group=true';
+		$('input#startkey').val('["'+s+'",0]');
+		$('input#endkey').val('["'+s+'",{}]');
+		$('form#search').attr('action',action);
+	});
+	
+
+});
+
+$.couch.app(function(app) {
+
+
+});
+
+</script>
+</html>

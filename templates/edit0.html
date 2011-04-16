@@ -1,0 +1,219 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+<title>{{title}}</title>
+
+
+
+
+</head>
+
+<body>
+
+<P><h6><i>AArticle: {{docid}} rev: {{docrev}}</i>__<span id='putrandom'></span></h6> </P>
+
+
+<hr>
+<!-- form to create a post -->
+<form id="update-art" action="{{dbname}}/{{docid}}" method="POST" content-type='multipart/form-data'>
+
+
+<p>
+{{#b_new_doc}}
+<label><a href="" id="doc-url-calculate">doc-url: </a><input type="text" id="doc_url" name="doc_url" value="" style="width:90%"></label><br/>
+{{/b_new_doc}}
+<label>Text:<br><!-- rows="15" cols="80" -->
+
+<textarea name="text" style="width:100%;height:500px" id="edit_area" >{{{doctext}}}</textarea>
+
+<!--
+<textarea name="text" style="width:100%;height:500px" class="codepress html linenumbers-on" id="edit_area" ></textarea>
+<textarea name="text" style="width:100%;height:70%"></textarea>
+-->
+
+</label>
+</p>
+<p>
+<label>tags: <input type="text" id="tags" name="tags" value="" style="width:90%"></label>
+</p>
+
+
+<input type="submit" id="submit-art" value="Save &rarr;"/><label id="show_rev"></label>
+
+</form>
+<hr>
+
+
+
+{{^b_new_doc}}
+<div id="filelist">Attachments</div>
+
+<form id='attachment-form' method='post' action='/{{db_name}}/{{docid}}' content-type='multipart/form-data' enctype='multipart/form-data' >
+	<input id='_attachments' type='file' name='_attachments'/>
+	<input type='hidden' id='_rev' name='_rev' value='{{docrev}}'/>
+	<input type="submit" id="upload-button" value="upload"/>
+</form>
+{{/b_new_doc}}
+<!--
+target="upload_target"
+<iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
+-->
+
+<hr>
+<label>Latex-test<textarea type="text" id="f-test" style="width:100%;" rows="1">$$</textarea><label>
+<div id="f-view"></div>
+<hr>
+<a href="http://de.wikipedia.org/wiki/Hilfe:TeX">wiki/Hilfe:TeX</a>
+<a href="http://www.mathjax.org/resources/docs/?tex.html">mathjax</a>
+
+</body>
+
+<script type="text/javascript" charset="utf-8">
+
+
+
+
+var editor = null;
+
+$(document).ready(function() {
+
+	$('#putrandom').html( Math.random() );
+	
+
+
+
+
+var calculate_doc_url = function(){
+	var now = new Date();
+    var millis = (now).getTime();
+
+	var title = $('#content').text().substr(0,40);
+	title = title.replace(/\W/g,'_');
+    title = title.replace(/[_]+$/,'');
+	var month = (now.getMonth()+1)<10? '0'+(now.getMonth()+1):(now.getMonth()+1);
+	var day = (now.getDate())<10? '0'+(now.getDate()):(now.getDate());
+	var minutes = (now.getMinutes())<10? '0'+(now.getMinutes()):(now.getMinutes());
+	var hours = (now.getHours())<10? '0'+(now.getHours()):(now.getHours());
+	var datum = now.getFullYear()+"-"+month+"-"+day+"_"+hours+":"+minutes;
+    return datum + '_' + title;
+}
+
+	// calculate the doc url str	
+	if ($('#doc-url-calculate') != null){
+		$('#doc-url-calculate').click(function(){
+			$('#doc_url').val(calculate_doc_url());
+			return false;
+		});
+	}
+
+
+   	$('#f-test').keyup(function(){
+		$('#f-view').html( $('#f-test').val() );
+		MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+	});
+
+
+	{{^b_new_doc}}
+	var update_file_list = function(){
+
+		$.get('/{{db_name}}/{{docid}}',
+			function(data) {
+				var doc = JSON.parse(data);
+				var list_html = '';
+				for (f in doc._attachments){
+					list_html = list_html+'<b>'+f+'</b> &lt;img src="/{{db_name}}/{{docid}}/'+f+'"&gt;&lt;/img&gt;<br>'
+				}
+  				$('#filelist').html(list_html);
+				//alert(data);
+			}
+		);
+	}
+	update_file_list();
+	//Attachments
+	var options = {
+		target:    '',
+		url:       "/{{db_name}}/{{docid}}",
+		type:      "post",
+		async:  false,
+		success:   function(data) {
+/*
+<head></head><body><pre>{"ok":true,"id":"2010-9-22_20:56_Wie_ist_die_Zeitentwicklung_dargestellt","rev":"40-12f01f6ff4b69e235b0b08ed61436d14"}
+</pre></body>
+
+{"error":"conflict","reason":"Document update conflict."}
+*/
+			var resp = JSON.parse($(data).html());
+			if (resp.error != undefined){ alert($(data).html()); return;}
+			
+			$('#_rev').attr('value',resp.rev);
+
+			update_file_list();
+		}
+	};
+
+	$("#upload-button").click(function() {
+		$("#attachment-form").ajaxSubmit(options);
+		return false;
+	});		
+	{{/b_new_doc}}
+
+
+});
+
+
+
+$.couch.app(function(app) {
+
+  var redirect = app.require("vendor/couchapp/lib/redirect");
+
+
+  app.docForm("form#update-art", {
+    id : '{{docid}}',
+    fields: ['text', 'tags','doc_url'],
+    
+    template: {type: "article"}, 
+    beforeSave: function(doc) {
+
+		//edit = document.getElementById("f-test");
+		//doc.text = edit_area.getCode();
+	
+		var now = new Date();
+		doc.creation = now.getTime();
+		doc.text_mathjax_cache = null;
+        
+		{{#b_new_doc}}
+			if (doc.doc_url==null){
+				var datum = now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate()+"_"
+					+now.getHours()+":"+now.getMinutes();
+				doc._id = datum + '_noname';
+			}
+			else doc._id =  doc.doc_url;
+		{{/b_new_doc}}
+        
+
+		if (doc.tags != null){
+			doc.tags = doc.tags.replace (/^\s+/,'').replace (/\s+$/,'');
+			doc.tags = doc.tags.split(',');
+			for (var i=0; i<doc.tags.length; i++) 
+			doc.tags[i] = doc.tags[i].replace (/^\s+/,'').replace (/\s+$/,'');
+		
+		}
+
+
+    },
+    success: function(res, doc) {
+        //alert("Success! rev: "+doc._rev);
+		$('#show_rev').html(doc._rev);
+		{{#b_new_doc}}
+//			redirect.permanent('/{{db_name}}/_design/01/_show/edit/'+doc._id);
+			redirect.permanent("/{{db_name}}/_design/{{doc_name}}/_show/edit/{{docid}}");
+		{{/b_new_doc}}		
+		{{^b_new_doc}}
+			$('#_rev').attr('value',doc._rev);
+		{{/b_new_doc}}
+    }
+  });
+});
+</script>
+</html>
