@@ -209,6 +209,7 @@ $.couch.app(function(app) {
 	$("#search_div").bind("id", function(e, params) {
 		
 		document_load(params.id);
+		document.title = params.id;
 		posts_load(params.id);
 		/*
 		// lade die posts zu der id
@@ -270,9 +271,24 @@ $.couch.app(function(app) {
 
 	$('#comment-form').submit(function() {
 
+		var doc = {};
+		var now = new Date();
+		doc.creation = now.getTime();
+		
+		var month = (now.getMonth()+1)<10? '0'+(now.getMonth()+1):(now.getMonth()+1);
+		var day = (now.getDate()+1)<10? '0'+(now.getDate()+1):(now.getDate()+1);
+		var datum = now.getFullYear()+"-"+month+"-"+day+"_"
+					+now.getHours()+":"+now.getMinutes();
+
+		doc.nick = $('input[name="nick"]').val();
+		doc.text = $('input[name="post"]').val();
+		doc.parent = document.title;
+		doc.type = 'post';
+
+		doc._id = datum + doc.nick;
 
    		$.couch.db(app.db.name).saveDoc(  
-   			{ _id:"my_new_post_delme", name: "John", text: "hallo" },
+   			doc,
  			{success: function() { alert("Saved ok."); }}  
    		);  
 
