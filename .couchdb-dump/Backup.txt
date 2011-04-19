@@ -1,0 +1,24 @@
+Backup
+
+Für die Erstellung eines Backups kann man die Replikation verwenden, indem man einfach alle Daten auf einen anderen Server kopiert. Wer die Daten richtig archivieren will sollte dies mit couchdb-dump tun. Die Syntax des Befehls lautet
+
+couchdb-dump [Options] dbname
+
+Der Befehl gibt das Backup in der Konsole aus. Man muss die Ausgabe also in eine Datei umleiten. Möchte man beispielsweise die Datenbank „adressbuch“ auf dem lokalen Server sichern sähe der Befehl so aus
+
+couchdb-dump http://127.0.0.1:5984/adressbuch > adressbuch.txt
+
+Um die Datenbank wieder herzustellen benutzt man den Befehl couchdb-load. Die Syntax lautet
+
+couchdb-load [Options] dbname
+
+Zunächst löscht man eine eventuell existierende Datenbank und erstellt eine leere.
+
+curl -X DELETE http://127.0.0.1:5984/adressbuch
+curl -X PUT http://127.0.0.1:5984/adressbuch
+
+Anschließend läd man mit couchdb-load das Backup wieder auf den Server.
+
+couchdb-load --input=adressbuch.txt http://127.0.0.1:5984/adressbuch
+
+
