@@ -3,7 +3,7 @@
   <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>_wal_</title>
-    <!--<link rel="stylesheet" href="style/main.css" type="text/css"> -->
+    <link rel="stylesheet" href="style/main.css" type="text/css">
 	<!--<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">-->
 
 
@@ -105,7 +105,7 @@ $.couch.app(function(app) {
 				}, 
 				function(data) {
 					var req = JSON.parse(data);
-					var html = '<ul>';
+					var html = '<ul id="navlist>';
 					for (var i=0; i<req.rows.length; i++){
 						var e = req.rows[i];
 						html = html + '<li><a href="#/id/'+e["value"]+'" >' + e["value"]+ '</a></li>';
@@ -258,12 +258,25 @@ $.couch.app(function(app) {
 
 	$("#tags").evently({
 	  _init : {
-	    mustache : "{{#examples}}<a href=\"#/search/{{key}}\" >{{key}}</a> | {{/examples}}",
+	    mustache : "{{#examples}}<a style=\"font-size:{{value}}em;\" href=\"#/search/{{key}}\" >{{key}}</a> | {{/examples}}",
 		query : {view: "tags", reduce:true, group:true},
 		data: function(data) {
+
+		  // finde Parameter für die Schrift Skalierung
+		  var max = 0; 
+		  var min = data.rows[0].value;
+		  for (var i=0; i<data.rows.length; i++){
+			if (data.rows[i].value > max) max = data.rows[i].value;
+			if (data.rows[i].value < min) min = data.rows[i].value;
+		  }
+		  for (var i=0; i<data.rows.length; i++){
+			data.rows[i].value = data.rows[i].value*min/max * 2 + 0.3;   //skaliere die jeweilige Schrift
+		  }	
+
 		  return {examples: data.rows};
 		}
-	  }
+	  },
+	  _changes : function(){ $("#tags").trigger("_init"); }
 	},app);
 
 
