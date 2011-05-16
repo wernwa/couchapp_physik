@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>_wal_</title>
+    <link rel="stylesheet" href="style/main.css" type="text/css">
+	<!--<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">-->
+
+
+  </head>
+
+
+  <body>
+    <div id="tags"></div>
+
+<hr>
+<div id="search_div">
+<form>
+  <input type="text" id="search" name="search"/>
+  <input id="submitsearch" type="submit" value="search"/>
+</form>
+<a id="linkhelper" href='#/search/haloa' style="visibility: hidden;"></a>
+</div>
+
+    <div id="content" style="margin:10px;" > 
+
+<p>
+<ul>
+<li><a href="https://github.com/wernwa/qm2-ka-zeppenfeld-ws1011">qm2-ka-zeppenfeld-ws1011</a></li>
+<li><a href="https://github.com/wernwa/festk-ka-ustinov-ws1011">festk-ka-ustinov-ws1011</a> | <a href="https://github.com/wernwa/festk-ka-ustinov-ws1011/raw/master/vorles/ustinov_festk_ws1011.pdf"/>PDF </a></li>
+</ul>
+</p>
+
+
+<p>	E-Mail an: wernwa (at) gmail (dot) com</p>
+	</div>
+
+	<hr>
+
+<div id="posts"></div>
+
+
+<form id="comment-form">
+	<label>nick</label><input type='text' name='nick'></input>
+	<label>text</label><input type='text' name='post' style="width:400px;"></input>
+	<input type="submit" value="Go" />
+</form>
+
+
+
+</body>
+
+
+
+<script src="include/loader.js"></script>
+<script src="include/http_get.js"></script>
+
+
+
+<!--
+<script src="/jslib/mathjax/MathJax.js">
+MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+-->
+
+
+
+
+
+
+<script type="text/javascript" src="/jslib/outerhtml/jquery.outerhtml.js"></script>
+<!-- <script type="text/javascript" src="/jslib/form/jquery.form.js"></script> -->
+
+
+<script type="text/javascript" charset="utf-8">
+
+
+
+
+	var search_2_content;
+	var document_load;
+	var posts_load;
+
+
+
+
+$.couch.app(function(app) {
+	
+
+
+
+	search_2_content  = function(search_str){
+		//alert(app.ddoc._id);
+			search_str = search_str.toLowerCase();
+			$("input#search").val(search_str); 
+
+			$.get('/'+app.db.name+'/'+app.ddoc._id+'/_view/search', 
+				{ descending:true
+				 ,startkey:'["'+search_str+'",{}]'  
+				 ,endkey: '["'+search_str+'",0]'
+				,reduce:false
+				 
+				 //,group:true
+				 //,group_level:2
+				}, 
+				function(data) {
+					var req = JSON.parse(data);
+					var html = '<ul id="navlist>';
+					for (var i=0; i<req.rows.length; i++){
+						var e = req.rows[i];
+						html = html + '<li><a href="#/id/'+e["value"]+'" >' + e["value"]+ '</a></li>';
+                    }
+					var html = html+'</ul>';
+  					$('#content').html(html);
+
+  					//$('#content').html(data);
+				}
+			);
+
+	}
+//onclick=\'document_load("'+e["value"]+'"); return false;\'
+
+	document_load = function(id){
+        var domain = document.domain;
+		if (domain == 'localhost') domain = domain+':5984';
+		//var pdf_url = encodeURIComponent('http://'+domain+"/physik/"+id+"/"+id+".pdf");
+
+		
+
+
+		$.get('/'+app.db.name+'/'+id,
+			function(data) {
+	
+				var doc = JSON.parse(data);
+				var posthtml = '';
+				if (doc.posthtml !== undefined) posthtml = doc.posthtml;
+
+				//var pdfurl = $('viewpdf',$(posthtml)).attr('url');
+
+				
+				$('#content').html('<P>'+posthtml+'</P>');				
+
+
+				var pdfurl = $('viewpdf').attr('url');
+				
+				var gviewer = '<iframe id="pdf_iframe" src="http://docs.google.com/viewer?url='+pdfurl+'&embedded=true" style="border: none;width:100%;" onload="function resize_iframe(){var theFrame = $(\'#pdf_iframe\'); theFrame.height($(document).height() - theFrame.offset().top - 50);	} window.onresize = resize_iframe;resize_iframe();"></iframe>';
+
+				$('viewpdf').replaceWith(gviewer);
+
+				/*$.get('/'+db+'/'+design+'/_show/tex2html/'+id,
+					function(data) {
+						$('#content').html('<P>'+data+'</P>'+'<hr><P>'+posthtml+'</P>');
+           			    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);           
+					}
+				);*/           
+
+			}
+		);
+
+
+
+
+	}
+
+
+
+	
+	posts_load = function(id){
+
+		//var test = app;
+
+		$.get('/'+app.db.name+'/'+app.ddoc._id+'/_view/posts', 
+			{startkey:"[\""+id+"\",0]"
+			,endkey:"[\""+id+"\",{}]"
+			//,descending:true
+			,reduce:false
+			,include_docs:true
+
+			},
+			function(data) {
+				
+				var query = JSON.parse(data);
+				var post_str = '';
+				for (var i=0; i<query.rows.length; i++){
+					var post = query.rows[i].doc;
+					post_str += '<div style="position:relative; left:10px;"><b>'+post.nick+" - </b>"+post.text+"</div>";
+				}
+
+				//alert(id + " "+query.rows.length);
+
+				//post_str += '</ul>';
+				$('#posts').html('<div style="position:relative; left:10px;">'+post_str+'</div>');				
+
+			}
+		);
+	}
+
+
+	$("#search_div").bind("search", function(e, params) {
+		search_2_content(params.id);
+		document.title = params.id;
+		// lösche die posts
+		$('#posts').html('');
+	});
+	$("#search_div").pathbinder("search", "/search/:id");
+
+
+
+	$("#search_div").bind("id", function(e, params) {
+		
+		document_load(params.id);
+		document.title = params.id;
+		//posts_load(params.id);
+		/*
+		// lade die posts zu der id
+		$("#posts").evently({
+			_init : {
+				mustache : "posts: <ul>{{#elements}}{{#doc}} <li><b>{{nick}} - </b>{{text}}</li>{{/doc}}{{/elements}}</ul>",
+				query : {view: "posts"
+						 ,descending:true
+						 ,startkey:[params.id,{}]
+						 ,endkey:[params.id,0]
+						,reduce:false
+						,include_docs:true
+						},
+				data: function(data) {
+					return {elements: data.rows};
+				},	
+			}
+		
+
+		},app);*/
+
+		
+
+	});
+	$("#search_div").pathbinder("id", "/id/:id");
+
+
+	$.pathbinder.begin("/");
+
+	
+	$('input#submitsearch').click(function(){
+		
+		var search_str = $('input#search').val().toLowerCase();
+
+		var url = ''+window.location;
+		var index_sharp = url.indexOf('#');
+		if (index_sharp == -1) 
+			url = url + '#/search/'+search_str;
+		else
+			url = url.substr(0,index_sharp) + '#/search/'+search_str;
+
+		window.location = url;
+		
+		return false;
+	});
+
+	$("#tags").evently({
+	  _init : {
+	    mustache : "{{#examples}}<a style=\"font-size:{{value}}em;\" href=\"#/search/{{key}}\" >{{key}}</a> | {{/examples}}",
+		query : {view: "tags", reduce:true, group:true},
+		data: function(data) {
+
+		  // finde Parameter für die Schrift Skalierung
+		  var max = 0; 
+		  var min = data.rows[0].value;
+		  for (var i=0; i<data.rows.length; i++){
+			if (data.rows[i].value > max) max = data.rows[i].value;
+			if (data.rows[i].value < min) min = data.rows[i].value;
+		  }
+		  for (var i=0; i<data.rows.length; i++){
+			data.rows[i].value = data.rows[i].value*min/max * 2 + 0.3;   //skaliere die jeweilige Schrift
+		  }	
+
+		  return {examples: data.rows};
+		}
+	  },
+	  _changes : function(){ $("#tags").trigger("_init"); }
+	},app);
+
+
+
+
+	$('#comment-form').submit(function() {
+
+		var doc = {};
+		var now = new Date();
+		doc.creation = now.getTime();
+		
+		var month = (now.getMonth()+1)<10? '0'+(now.getMonth()+1):(now.getMonth()+1);
+		var day = (now.getDate()+1)<10? '0'+(now.getDate()+1):(now.getDate()+1);
+		var datum = now.getFullYear()+"-"+month+"-"+day+"_"
+					+now.getHours()+":"+now.getMinutes()+":"+now.getSeconds();
+
+		doc.nick = $('input[name="nick"]').val();
+		doc.text = $('input[name="post"]').val();
+		doc.parent = document.title;
+		doc.type = 'post';
+
+		doc._id = datum + doc.nick;
+
+   		$.couch.db(app.db.name).saveDoc(  
+   			doc,
+ 			{success: function() { 
+				//alert("Saved ok."); 
+			}}  
+   		);  
+
+		// no standard action from form
+		return false;
+	});
+
+	// TODO changes Feed einschränken
+	$("#posts").evently({
+		_changes : function(data) {
+			posts_load(document.title);
+		}
+
+	},app);
+
+	
+});
+
+
+
+  </script>
+</html>
