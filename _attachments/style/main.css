@@ -3,7 +3,7 @@
 
 
 a:link { font-weight:bold; color:blue; text-decoration:none; }
-a:visited { font-weight:bold; color:silver; text-decoration:none; }
+a:visited { font-weight:bold; color:#2222cc; text-decoration:none; }
 a:focus { font-weight:bold; color:red; text-decoration:underline; }
 a:hover { font-weight:bold; color:orange; text-decoration:none; }
 a:active { font-weight:bold; color:lime; text-decoration:underline; }
@@ -12,16 +12,16 @@ a:active { font-weight:bold; color:lime; text-decoration:underline; }
 {
 padding-left: 0;
 margin-left: 0;
-border-bottom: 1px solid gray;
-width: 200px;
+//border-bottom: 1px solid gray;
 }
 
 #navlist li
 {
-list-style: none;
+list-style-type: circle;
+//list-style: none;
 margin: 0;
 padding: 0.25em;
-border-top: 1px solid gray;
+//border-top: 1px solid gray;
 }
 
 #navlist li a { text-decoration: none; }

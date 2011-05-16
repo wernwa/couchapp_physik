@@ -11,10 +11,8 @@
 
 
   <body>
-    <div id="tags"></div>
 
-<hr>
-<div id="search_div">
+<div id="search_div" style="float:left;">
 <form>
   <input type="text" id="search" name="search"/>
   <input id="submitsearch" type="submit" value="search"/>
@@ -22,7 +20,9 @@
 <a id="linkhelper" href='#/search/haloa' style="visibility: hidden;"></a>
 </div>
 
-    <div id="content" style="margin:10px;" > 
+    <div id="tags" style="margin:10px;float:left;"></div>
+
+    <div id="content" style="margin:10px; clear:both;" > 
 
 <p>
 <ul>
@@ -37,12 +37,8 @@
 
 	<hr>
 
-<div id="posts"></div>
-<form id="comment-form">
-	<label>nick</label><input type='text' name='nick'></input>
-	<label>text</label><input type='text' name='post' style="width:400px;"></input>
-	<input type="submit" value="Go" />
-</form>
+<div id="basic_path"/>
+
 
   </body>
 
@@ -53,7 +49,7 @@
 
 
 
-
+<!--
 <script src="/jslib/mathjax/MathJax.js">
 MathJax.Hub.Config({
     extensions: ["tex2jax.js"],
@@ -61,7 +57,7 @@ MathJax.Hub.Config({
     tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
   });
 </script>
-
+-->
 
 
 
@@ -69,17 +65,28 @@ MathJax.Hub.Config({
 
 
 <script type="text/javascript" src="/jslib/outerhtml/jquery.outerhtml.js"></script>
-<!-- <script type="text/javascript" src="/jslib/form/jquery.form.js"></script> -->
+<script type="text/javascript" src="/jslib/form/jquery.form.js"></script>
 
 
 <script type="text/javascript" charset="utf-8">
 
 
+/*
+$(document).ready(function() {
 
+$("#basic_path").html('<p><a href="#/foo">click for foo</a></p>');
+$("#basic_path").bind("foo", function() {
+  $(this).html("<p>you went to foo</p>");
+});
+$("#basic_path").pathbinder("foo", "/foo");
+
+
+});
+*/
 
 	var search_2_content;
-	var document_load;
-	var posts_load;
+	var load_document;
+
 
 
 
@@ -105,12 +112,12 @@ $.couch.app(function(app) {
 				}, 
 				function(data) {
 					var req = JSON.parse(data);
-					var html = '<ul id="navlist>';
+					var html = '<div style="margin:20px;"><ul id="navlist">';
 					for (var i=0; i<req.rows.length; i++){
 						var e = req.rows[i];
 						html = html + '<li><a href="#/id/'+e["value"]+'" >' + e["value"]+ '</a></li>';
                     }
-					var html = html+'</ul>';
+					var html = html+'</ul></div>';
   					$('#content').html(html);
 
   					//$('#content').html(data);
@@ -118,9 +125,9 @@ $.couch.app(function(app) {
 			);
 
 	}
-//onclick=\'document_load("'+e["value"]+'"); return false;\'
+//onclick=\'load_document("'+e["value"]+'"); return false;\'
 
-	document_load = function(id){
+	load_document = function(id){
         var domain = document.domain;
 		if (domain == 'localhost') domain = domain+':5984';
 		//var pdf_url = encodeURIComponent('http://'+domain+"/physik/"+id+"/"+id+".pdf");
@@ -157,50 +164,10 @@ $.couch.app(function(app) {
 			}
 		);
 
-
-
-
 	}
-
-
-
-	
-	posts_load = function(id){
-
-		//var test = app;
-
-		$.get('/'+app.db.name+'/'+app.ddoc._id+'/_view/posts', 
-			{startkey:"[\""+id+"\",0]"
-			,endkey:"[\""+id+"\",{}]"
-			//,descending:true
-			,reduce:false
-			,include_docs:true
-
-			},
-			function(data) {
-				
-				var query = JSON.parse(data);
-				var post_str = '';
-				for (var i=0; i<query.rows.length; i++){
-					var post = query.rows[i].doc;
-					post_str += '<div style="position:relative; left:10px;"><b>'+post.nick+" - </b>"+post.text+"</div>";
-				}
-
-				//alert(id + " "+query.rows.length);
-
-				//post_str += '</ul>';
-				$('#posts').html('<div style="position:relative; left:10px;">'+post_str+'</div>');				
-
-			}
-		);
-	}
-
 
 	$("#search_div").bind("search", function(e, params) {
 		search_2_content(params.id);
-		document.title = params.id;
-		// lösche die posts
-		$('#posts').html('');
 	});
 	$("#search_div").pathbinder("search", "/search/:id");
 
@@ -208,37 +175,21 @@ $.couch.app(function(app) {
 
 	$("#search_div").bind("id", function(e, params) {
 		
-		document_load(params.id);
+		load_document(params.id);
 		document.title = params.id;
-		//posts_load(params.id);
-		/*
-		// lade die posts zu der id
-		$("#posts").evently({
-			_init : {
-				mustache : "posts: <ul>{{#elements}}{{#doc}} <li><b>{{nick}} - </b>{{text}}</li>{{/doc}}{{/elements}}</ul>",
-				query : {view: "posts"
-						 ,descending:true
-						 ,startkey:[params.id,{}]
-						 ,endkey:[params.id,0]
-						,reduce:false
-						,include_docs:true
-						},
-				data: function(data) {
-					return {elements: data.rows};
-				},	
-			}
-		
-
-		},app);*/
-
-		
 
 	});
 	$("#search_div").pathbinder("id", "/id/:id");
 
+/*	var url = ''+window.location;
+	var m = url.match(/#\/search\/(.*)/);
+	if (m != null) search_2_content(m[1]);
+	m = url.match(/#\/id\/(.*)/);
+	if (m != null) load_document(m[1]);*/
 
 	$.pathbinder.begin("/");
 
+	//$.pathbinder.triggerOnPath(window.location);
 	
 	$('input#submitsearch').click(function(){
 		
@@ -280,44 +231,25 @@ $.couch.app(function(app) {
 	},app);
 
 
-
-
-	$('#comment-form').submit(function() {
-
-		var doc = {};
-		var now = new Date();
-		doc.creation = now.getTime();
-		
-		var month = (now.getMonth()+1)<10? '0'+(now.getMonth()+1):(now.getMonth()+1);
-		var day = (now.getDate()+1)<10? '0'+(now.getDate()+1):(now.getDate()+1);
-		var datum = now.getFullYear()+"-"+month+"-"+day+"_"
-					+now.getHours()+":"+now.getMinutes()+":"+now.getSeconds();
-
-		doc.nick = $('input[name="nick"]').val();
-		doc.text = $('input[name="post"]').val();
-		doc.parent = document.title;
-		doc.type = 'post';
-
-		doc._id = datum + doc.nick;
-
-   		$.couch.db(app.db.name).saveDoc(  
-   			doc,
- 			{success: function() { 
-				//alert("Saved ok."); 
-			}}  
-   		);  
-
-		// no standard action from form
-		return false;
-	});
-
-	// TODO changes Feed einschränken
-	$("#posts").evently({
-		_changes : function(data) {
-			posts_load(document.title);
+/*
+	$("#content").evently({
+		search : {
+			mustache : "<ul>{{#examples}} <li><a href='#/id/{{value}}'>{{value}}</a></li>{{/examples}}</ul>",
+			query : {view: "search"
+					 ,descending:true
+					 ,startkey:'["'+search_str+'",{}]'  
+				 	,endkey: '["'+search_str+'",0]'
+					,reduce:false},
+			data: function(data) {
+			  return {examples: data.rows};
+			},	
 		}
+		
 
 	},app);
+*/
+
+	
 
 	
 });
