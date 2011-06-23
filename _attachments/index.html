@@ -70,7 +70,6 @@ MathJax.Hub.Config({
 
 <script type="text/javascript" charset="utf-8">
 
-
 /*
 $(document).ready(function() {
 
@@ -96,26 +95,35 @@ $.couch.app(function(app) {
 	//////////////
 	// counter
 	////////
+
+	var now = new Date();
+	var access_counter_id = 'access_counter_'+(now.getMonth()+1)+'-'+now.getFullYear();
+
 	function save_counter_doc(counter_doc){
 
+		// zähle den userAgent String		
 		var userAgent = navigator.userAgent;
 		if (counter_doc[userAgent] === undefined){
 			counter_doc[userAgent] = 1;
 		}else counter_doc[userAgent] += 1;
 
-		$.couch.db(app.db.name).saveDoc(counter_doc);
-	}
+		// ignoriere die errors die eventuell bei saveDoc auftreten
+		var options = {error:function(status, error, reason){}};
+		$.couch.db(app.db.name).saveDoc(counter_doc,options);
 
-	var now = new Date();
-	var access_counter_id = 'access_counter_'+(now.getMonth()+1)+'-'+now.getFullYear();
+	}
 
 	$.ajax({
   		url: '/'+app.db.name+'/'+access_counter_id,
-		error: function(jqXHR, textStatus, errorThrown){
-			//alert("error "+jqXHR);
-			var counter_doc = {_id: access_counter_id, cnt: 1}
-			save_counter_doc(counter_doc);
-		},
+
+		error:function (xhr, ajaxOptions, thrownError){
+	        if (xhr.status==404){
+				var counter_doc = {_id: access_counter_id, cnt: 1}
+				save_counter_doc(counter_doc);
+			}
+    	    //alert(xhr.statusText);
+    	    //alert(xhr.responseText);
+    	},
 		success: function(data){
 			var counter_doc = JSON.parse(data);
 			counter_doc.cnt += 1;
