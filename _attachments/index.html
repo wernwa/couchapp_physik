@@ -46,9 +46,6 @@
 <p>     E-Mail an: wernwa (at) gmail (dot) com</p>
 
 
-
-	<hr>
-
 <div id="basic_path"/>
 
 <!-- wetter.com button 180x150-->
@@ -67,12 +64,16 @@
 </div>
 <!-- wetter.com button 180x150-->
 
+<br>
 
-<hr>
-<i> Webcam am Marktplatz Karlsruhe</i>
-<div>
+<i> Webcam am Marktplatz Karlsruhe</i> <a onclick="reload_webcam(); return false;">[reload]</a>
+
+<div id="webcam">
+
 <img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0" alt="Webcam am Marktplatz" />
+
 </div>
+
 
 </div> <!-- ende div content -->
   </body>
@@ -122,7 +123,12 @@ $("#basic_path").pathbinder("foo", "/foo");
 	var load_document;
 
 
+function reload_webcam(){
 
+	var timestamp = new Date().getTime();
+	$("#webcam").html('<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0&forbrowsercacheavoid42='+timestamp+'" alt="Webcam am Marktplatz" />');
+
+}
 
 
 $.couch.app(function(app) {
