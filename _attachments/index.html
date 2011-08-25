@@ -66,14 +66,22 @@
 
 <br>
 
-<i> Webcam am Marktplatz Karlsruhe</i> <a onclick="reload_webcam(); return false;">[reload]</a>
+<i> Webcam am Marktplatz Karlsruhe</i> <a onclick="reload_webcam('webcam_marktplatz'); return false;">[reload]</a>
 
-<div id="webcam">
+<div id="webcam_marktplatz">
 
-<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0" alt="Webcam am Marktplatz" />
+	<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0" alt="Webcam am Marktplatz" />
 
 </div>
 
+<!--<br>
+<i> Webcam Physik Hochhaus Karlsruhe </i> <a onclick="reload_webcam('webcam_hochhaus'); return false;">[reload]</a>
+
+<div id="webcam_hochhaus">
+
+	<iframe src="http://www.panoramablick.com/partner_sites/partner.php?cid=1266&nav_id=207&kat_id=1610&l=en" width="600" height="600" scrolling="no" frameborder=0 ></iframe>
+
+</div>-->
 
 </div> <!-- ende div content -->
   </body>
@@ -123,10 +131,16 @@ $("#basic_path").pathbinder("foo", "/foo");
 	var load_document;
 
 
-function reload_webcam(){
+function reload_webcam(id){
 
 	var timestamp = new Date().getTime();
-	$("#webcam").html('<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0&forbrowsercacheavoid42='+timestamp+'" alt="Webcam am Marktplatz" />');
+	if (id=='webcam_marktplatz'){
+		$("#"+id).html('<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0&forbrowsercacheavoid42='+timestamp+'" alt="Webcam am Marktplatz" />');
+	}else{
+		 if (id=='webcam_hochhaus'){
+			$("#"+id).html('<iframe src="http://www.panoramablick.com/partner_sites/partner.php?cid=1266&nav_id=207&kat_id=1610&l=en&forbrowsercacheavoid42='+timestamp+' width="600" height="600" scrolling="no" frameborder=0  ></iframe>');
+		 }
+	}
 
 }
 
