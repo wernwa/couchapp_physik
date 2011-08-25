@@ -129,10 +129,9 @@ $("#basic_path").pathbinder("foo", "/foo");
 */
 
 // google-wetter
-/*
 $.ajax({
         type: "GET",
-	url: "http://www.google.com/ig/api?weather=76133-Germany&hl=de",
+	url: "/ig/api?weather=76133-Germany&hl=de&gweather",
 	dataType: "xml",
 	success: function(xml) {
  		$(xml).find('temp_c').each(function(){
@@ -141,7 +140,7 @@ $.ajax({
 		});
 	}
 });
-*/
+
 
 	var search_2_content;
 	var load_document;
