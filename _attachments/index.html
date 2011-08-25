@@ -63,6 +63,7 @@
  </div>
 </div>
 <!-- wetter.com button 180x150-->
+<div id="google-wetter"></div>
 
 <br>
 
@@ -124,6 +125,21 @@ $("#basic_path").bind("foo", function() {
 $("#basic_path").pathbinder("foo", "/foo");
 
 
+});
+*/
+
+// google-wetter
+/*
+$.ajax({
+        type: "GET",
+	url: "http://www.google.com/ig/api?weather=76133-Germany&hl=de",
+	dataType: "xml",
+	success: function(xml) {
+ 		$(xml).find('temp_c').each(function(){
+ 			var temp = $(this).attr('data');
+			$('#google-wetter').html('<b>Karlsruhe Aktuelle Temperatur: '+temp+'</b>');
+		});
+	}
 });
 */
 
