@@ -48,21 +48,6 @@
 
 <div id="basic_path"/>
 
-<!-- wetter.com button 180x150-->
-<div id="wettercom-button-58ef37fc861763ff1e27ebd5f69f0769">
- <link id="wettercom-css" href="http://woys.wetter.com/woys3.1.css.php?14398,58ef37fc861763ff1e27ebd5f69f0769" rel="stylesheet" type="text/css" />
- <div id="wettercom-title">
-   <a id="wettercom-citylink" href="http://www.wetter.com/wetter_aktuell/wettervorhersage/3_tagesvorhersage/?id=DE0005309" title="Wetter Karlsruhe" target="_blank">Wetter Karlsruhe</a><a id="wettercom-adminlink" href="http://www.wetter.com/wetter_aktuell/wettervorhersage/?s_path=EU%2FDE%2FBW" title="Wetter Baden-W&uuml;rttemberg" target="_blank">, BW</a>
- </div>
- <div id="wettercom-woys-58ef37fc861763ff1e27ebd5f69f0769"></div>
- <div id="wettercom-brand">
- <a id="wettercom-link" href="http://www.wetter.com/"><span id="wettercom-more">mehr Wetter auf </span><img id="wettercom-logo" src="http://imgs-2.wetter.com/layout/1/woys/logo.png" alt="wetter.com" title="wetter.com" /></a>
-</div>
- <div id="wettercom-clear">
-   <script type="text/javascript" src="http://woys.wetter.com/woys3.1.js.php?14398,58ef37fc861763ff1e27ebd5f69f0769"></script>
- </div>
-</div>
-<!-- wetter.com button 180x150-->
 <div id="google-wetter"></div>
 
 <br>
@@ -134,10 +119,16 @@ $.ajax({
 	url: "/ig/api?weather=76133-Germany&hl=de&gweather",
 	dataType: "xml",
 	success: function(xml) {
- 		$(xml).find('temp_c').each(function(){
- 			var temp = $(this).attr('data');
-			$('#google-wetter').html('<b>Karlsruhe Aktuelle Temperatur: '+temp+'</b>');
-		});
+ 		//$(xml).find('temp_c').each(function(){
+ 		//	var temp = $(this).attr('data');
+		//	$('#google-wetter').html('<b>Karlsruhe Aktuelle Temperatur: '+temp+'</b>');
+		//});
+		var curr = $(xml).find('current_conditions');
+		$('#google-wetter').html('Karlsruhe heute: <b>'+curr.find('temp_c').attr('data')+' °C </b>'+
+							curr.find('condition').attr('data')+' '+
+							curr.find('humidity').attr('data')+' '+
+							curr.find('wind_condition').attr('data')+' '+
+						'<img src="http://www.google.com'+curr.find('icon').attr('data')+'"/>');
 	}
 });
 
