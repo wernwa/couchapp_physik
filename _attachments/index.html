@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
+
+
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>_wal_</title>
-    <link rel="stylesheet" href="style/main.css" type="text/css">
+    <link rel="stylesheet" href="/physik04/_design/04/style/main.css" type="text/css">
 	<!--<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">-->
 
 
@@ -14,7 +16,7 @@
 
 
 
-<a href="/physik04/_design/04/index.html">Home</a>
+<a href="/ka-physik">Home</a>
 <div id="search_div" style="float:left;">
 <form>
   <input type="text" id="search" name="search"/>
@@ -76,8 +78,8 @@
 
 
 
-<script src="include/loader.js"></script>
-<script src="include/http_get.js"></script>
+<script src="/physik04/_design/04/include/loader.js"></script>
+<script src="/physik04/_design/04/include/http_get.js"></script>
 
 
 
@@ -115,46 +117,17 @@ $("#basic_path").pathbinder("foo", "/foo");
 });
 */
 
-// google-wetter
-$.ajax({
-        type: "GET",
-	url: "/ig/api?weather=76133-Germany&hl=de&gweather",
-	dataType: "xml",
-	success: function(xml) {
- 		//$(xml).find('temp_c').each(function(){
- 		//	var temp = $(this).attr('data');
-		//	$('#google-wetter').html('<b>Karlsruhe Aktuelle Temperatur: '+temp+'</b>');
-		//});
-		var curr = $(xml).find('current_conditions');
-		$('#google-wetter').html('Karlsruhe heute: <b>'+curr.find('temp_c').attr('data')+' °C </b>'+
-							curr.find('condition').attr('data')+' '+
-							curr.find('humidity').attr('data')+' '+
-							curr.find('wind_condition').attr('data')+' '+
-						'<img src="http://www.google.com'+curr.find('icon').attr('data')+'"/>');
-	}
-});
-
-
 	var search_2_content;
 	var load_document;
 
 
-function reload_webcam(id){
+//$.couch.app(function(app) {
+$(document).ready(function() {
 
-	var timestamp = new Date().getTime();
-	if (id=='webcam_marktplatz'){
-		$("#"+id).html('<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0&forbrowsercacheavoid42='+timestamp+'" alt="Webcam am Marktplatz" />');
-	}else{
-		 if (id=='webcam_hochhaus'){
-			$("#"+id).html('<iframe src="http://www.panoramablick.com/partner_sites/partner.php?cid=1266&nav_id=207&kat_id=1610&l=en&forbrowsercacheavoid42='+timestamp+' width="600" height="600" scrolling="no" frameborder=0  ></iframe>');
-		 }
-	}
-
-}
+	var dbname = 'physik04';
+	var ddoc_id = '_design/04';
 
 
-$.couch.app(function(app) {
-	
 	//////////////
 	// counter
 	////////
@@ -172,16 +145,31 @@ $.couch.app(function(app) {
 
 		// ignoriere die errors die eventuell bei saveDoc auftreten
 		var options = {error:function(status, error, reason){}};
-		$.couch.db(app.db.name).saveDoc(counter_doc,options);
+		$.couch.db(dbname).saveDoc(counter_doc,options);
+		/*var ret = $.ajax({
+   				type: "PUT",
+				url: '/'+dbname+'/'+access_counter_id,
+				data: JSON.stringify(counter_doc),
+				//dataType: "JSON",
+				async: false,
+			 	success: function(msg){
+			     //alert( "Data Saved: " + msg );
+			 	},
+				error:function (xhr, ajaxOptions, thrownError){
+		    	    alert(xhr.statusText);
+    	    		alert(xhr.responseText);
+		    	}
+			});
+		alert(ret.responseText);*/
 
 	}
 
 	$.ajax({
-  		url: '/'+app.db.name+'/'+access_counter_id,
+  		url: '/'+dbname+'/'+access_counter_id,
 
 		error:function (xhr, ajaxOptions, thrownError){
 	        if (xhr.status==404){
-				var counter_doc = {_id: access_counter_id, cnt: 1}
+				var counter_doc = {_id: access_counter_id, cnt: 1, type:'counter'}
 				save_counter_doc(counter_doc);
 			}
     	    //alert(xhr.statusText);
@@ -192,17 +180,18 @@ $.couch.app(function(app) {
 			counter_doc.cnt += 1;
 			//alert(counter_doc.count);
 			save_counter_doc(counter_doc);
+			
 		}
 	});
 
 
 
 	search_2_content  = function(search_str){
-		//alert(app.ddoc._id);
+		//alert(ddoc_id);
 			search_str = search_str.toLowerCase();
 			$("input#search").val(search_str); 
 
-			$.get('/'+app.db.name+'/'+app.ddoc._id+'/_view/search', 
+			$.get('/'+dbname+'/'+ddoc_id+'/_view/search', 
 				{ descending:true
 				 ,startkey:'["'+search_str+'",{}]'  
 				 ,endkey: '["'+search_str+'",0]'
@@ -226,7 +215,7 @@ $.couch.app(function(app) {
 			);
 
 	}
-//onclick=\'load_document("'+e["value"]+'"); return false;\'
+
 
 	load_document = function(id){
         var domain = document.domain;
@@ -236,7 +225,7 @@ $.couch.app(function(app) {
 		
 
 
-		$.get('/'+app.db.name+'/'+id,
+		$.get('/'+dbname+'/'+id,
 			function(data) {
 	
 				var doc = JSON.parse(data);
@@ -282,15 +271,9 @@ $.couch.app(function(app) {
 	});
 	$("#search_div").pathbinder("id", "/id/:id");
 
-/*	var url = ''+window.location;
-	var m = url.match(/#\/search\/(.*)/);
-	if (m != null) search_2_content(m[1]);
-	m = url.match(/#\/id\/(.*)/);
-	if (m != null) load_document(m[1]);*/
 
 	$.pathbinder.begin("/");
 
-	//$.pathbinder.triggerOnPath(window.location);
 	
 	$('input#submitsearch').click(function(){
 		
@@ -308,52 +291,74 @@ $.couch.app(function(app) {
 		return false;
 	});
 
-	$("#tags").evently({
-	  _init : {
-	    mustache : "{{#examples}}<a style=\"font-size:{{value}}em;\" href=\"#/search/{{key}}\" >{{key}}</a> | {{/examples}}",
-		query : {view: "tags", reduce:true, group:true},
-		data: function(data) {
-
-		  // finde Parameter für die Schrift Skalierung
-		  var max = 0; 
-		  var min = data.rows[0].value;
-		  for (var i=0; i<data.rows.length; i++){
-			if (data.rows[i].value > max) max = data.rows[i].value;
-			if (data.rows[i].value < min) min = data.rows[i].value;
-		  }
-		  for (var i=0; i<data.rows.length; i++){
-			data.rows[i].value = data.rows[i].value*min/max * 2 + 0.3;   //skaliere die jeweilige Schrift
-		  }	
-
-		  return {examples: data.rows};
-		}
-	  }
-	  //_changes : function(){ $("#tags").trigger("_init"); }
-	},app);
+	// tags
+	
+	$.get('/'+dbname+'/'+ddoc_id+'/_view/tags?reduce=true&group=true',
+		function(data) {
+	
+			var rows = JSON.parse(data).rows;
 
 
-/*
-	$("#content").evently({
-		search : {
-			mustache : "<ul>{{#examples}} <li><a href='#/id/{{value}}'>{{value}}</a></li>{{/examples}}</ul>",
-			query : {view: "search"
-					 ,descending:true
-					 ,startkey:'["'+search_str+'",{}]'  
-				 	,endkey: '["'+search_str+'",0]'
-					,reduce:false},
-			data: function(data) {
-			  return {examples: data.rows};
-			},	
-		}
-		
+			// finde Parameter für die Schrift Skalierung
+			var max = 0; 
+			var min = rows[0].value;
+			for (var i=0; i<rows.length; i++){
+				if (rows[i].value > max) max = rows[i].value;
+				if (rows[i].value < min) min = rows[i].value;
+			}
+			var html_str = '';
+			for (var i=0; i<rows.length; i++){
+				var size = rows[i].value*min/max * 2 + 0.3;   //skaliere die jeweilige Schrift
+				html_str += '<a style="font-size:'+size+'em;" href="#/search/'+rows[i].key+'" >'+rows[i].key+'</a> | '
+			}	
 
-	},app);
-*/
+			
+			$('#tags').html(html_str);			
+
+	});
 
 	
 
 	
-});
+
+
+
+	// google-wetter
+	$.ajax({
+    	    type: "GET",
+		url: "/ig/api?weather=76133-Germany&hl=de&gweather",
+		dataType: "xml",
+		success: function(xml) {
+ 			//$(xml).find('temp_c').each(function(){
+ 			//	var temp = $(this).attr('data');
+			//	$('#google-wetter').html('<b>Karlsruhe Aktuelle Temperatur: '+temp+'</b>');
+			//});
+			var curr = $(xml).find('current_conditions');
+			$('#google-wetter').html('Karlsruhe heute: <b>'+curr.find('temp_c').attr('data')+' °C </b>'+
+							curr.find('condition').attr('data')+' '+
+							curr.find('humidity').attr('data')+' '+
+							curr.find('wind_condition').attr('data')+' '+
+							'<img src="http://www.google.com'+curr.find('icon').attr('data')+'"/>');
+		}
+	});
+
+}); // end document ready
+
+
+
+function reload_webcam(id){
+
+	var timestamp = new Date().getTime();
+	if (id=='webcam_marktplatz'){
+		$("#"+id).html('<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0&forbrowsercacheavoid42='+timestamp+'" alt="Webcam am Marktplatz" />');
+	}else{
+		 if (id=='webcam_hochhaus'){
+			$("#"+id).html('<iframe src="http://www.panoramablick.com/partner_sites/partner.php?cid=1266&nav_id=207&kat_id=1610&l=en&forbrowsercacheavoid42='
+							+timestamp+' width="600" height="600" scrolling="no" frameborder=0  ></iframe>');
+		 }
+	}
+
+}
 
 
 
