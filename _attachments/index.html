@@ -7,25 +7,33 @@
     <title>_wal_</title>
     <link rel="stylesheet" href="/physik04/_design/04/style/main.css" type="text/css">
 	<!--<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">-->
-
+	<link rel="stylesheet" href="/physik04/_design/04/style/menu_style.css" type="text/css" />
 
   </head>
 
 
-  <body>
+<body>
 
 
 
-<a href="/ka-physik">Home</a>
-<div id="search_div" style="float:left;">
-<form>
-  <input type="text" id="search" name="search"/>
-  <input id="submitsearch" type="submit" value="search"/>
-</form>
-<a id="linkhelper" href='#/search/haloa' style="visibility: hidden;"></a>
-</div>
+	<ul id="menu">
+		<li><a href="/ka-physik" target="_self">home</a></li>
+		<li><a href="#/id/theo-fragen" target="_self">theo HD</a></li>
+		<li><a href="#/id/ex-fragen" target="_self">ex HD</a></li>
+		<li><a href="#/id/uni_links_ws1011" target="_self">links</a></li>
+		<li><a href="#/id/webcam-ka" target="_self">webcam-ka</a></li>
+	<li>
 
-    <div id="tags" style="margin:10px;float:left;"></div>
+	</li>
+		<form>
+		  <input type="text" id="search" name="search"/>
+		  <input id="submitsearch" type="submit" value="search"/>
+		</form>
+	</ul>
+
+<!--
+<div id="tags" style="margin:10px;float:left;"></div>
+-->
 
 <div id="content" style="margin:10px; clear:both;" > 
 
@@ -38,6 +46,7 @@
 
 </p>
 
+<!--
 <p>  
 <h3>Links</h3>
 </p>
@@ -47,7 +56,7 @@
 <li><a target="_black" href="#/id/ex-fragen">Fragen zur experementellen Phyisk HD</a></li>
 <li><a target="_black" href="http://de.wikipedia.org/wiki/Naturkonstante">Naturkonstanten</a></li>
 </ul>
-
+-->
 <p>     E-Mail an: wernwa (at) gmail (dot) com</p>
 
 
@@ -56,7 +65,7 @@
 <div id="google-wetter"></div>
 
 <br>
-
+<!--
 <i> Webcam am Marktplatz Karlsruhe</i> <a onclick="reload_webcam('webcam_marktplatz'); return false;">[reload]</a>
 
 <div id="webcam_marktplatz">
@@ -64,7 +73,7 @@
 	<img border="0" style="width: 515px;" src="http://service.ka-news.de/camimage.php?cam=0" alt="Webcam am Marktplatz" />
 
 </div>
-
+-->
 <!--<br>
 <i> Webcam Physik Hochhaus Karlsruhe </i> <a onclick="reload_webcam('webcam_hochhaus'); return false;">[reload]</a>
 
@@ -75,7 +84,8 @@
 </div>-->
 
 </div> <!-- ende div content -->
-  </body>
+
+</body>
 
 
 
@@ -257,20 +267,20 @@ $(document).ready(function() {
 
 	}
 
-	$("#search_div").bind("search", function(e, params) {
+	$("#search").bind("search", function(e, params) {
 		search_2_content(params.id);
 	});
-	$("#search_div").pathbinder("search", "/search/:id");
+	$("#search").pathbinder("search", "/search/:id");
 
 
 
-	$("#search_div").bind("id", function(e, params) {
+	$("#search").bind("id", function(e, params) {
 		
 		load_document(params.id);
 		document.title = params.id;
 
 	});
-	$("#search_div").pathbinder("id", "/id/:id");
+	$("#search").pathbinder("id", "/id/:id");
 
 
 	$.pathbinder.begin("/");
